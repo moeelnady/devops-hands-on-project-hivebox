@@ -52,4 +52,58 @@ Here is a pre-start checklist:
 
 ## Implementation
 
-** ADD YOUR IMPLEMENTATION DOCUMENTATION HERE **
+## 🏗️ 1. Building Images
+Run these commands from the directory containing your `Dockerfile`.
+
+| Command | Description |
+| :--- | :--- |
+| `docker build -t <image-name> .` | Build an image with a specific tag (name). |
+| `docker build -t <image-name>:<tag> .` | Build an image with a version (e.g., `myapp:v1`). |
+| `docker images` | List all locally stored images. |
+| `docker rmi <image-id>` | Remove a specific image. |
+
+---
+
+## 🚀 2. Running Containers
+The `-p` flag is mandatory to access your Spring Boot app from your browser.
+
+| Command | Description |
+| :--- | :--- |
+| `docker run -p 8080:8080 <image-name>` | Run container in the foreground (attached). |
+| `docker run -d -p 8080:8080 <image-name>` | Run in **Detached mode** (background). |
+| `docker run --name <name> -p 8080:8080 <image-name>` | Run and assign a custom name to the container. |
+| `docker run -e "SPRING_PROFILES_ACTIVE=dev" <image>` | Pass **Environment Variables** to Spring. |
+
+---
+
+## 🛠️ 3. Managing Containers
+Use these to control containers that are already created.
+
+| Command | Description |
+| :--- | :--- |
+| `docker ps` | Show **Running** containers. |
+| `docker ps -a` | Show **All** containers (including stopped/exited). |
+| `docker stop <name-or-id>` | Stop a running container gracefully. |
+| `docker start <name-or-id>` | Start a previously stopped container. |
+| `docker rm -f <name-or-id>` | Force remove a container (even if running). |
+
+---
+
+## 🔍 4. Debugging & Logs
+Essential for when your Spring app throws an exception during startup.
+
+| Command | Description |
+| :--- | :--- |
+| `docker logs <name-or-id>` | Fetch all logs from the container. |
+| `docker logs -f <name-or-id>` | **Follow** logs (real-time stream). |
+| `docker exec -it <name-or-id> /bin/sh` | Open a terminal **inside** the container. |
+| `docker inspect <name-or-id>` | View detailed JSON metadata (IPs, mounts, etc). |
+
+---
+
+## 🧹 5. Cleanup
+Docker can eat up disk space quickly on Ubuntu. Use these to stay organized.
+
+* **Remove all stopped containers:**
+  ```bash
+  docker container prune
