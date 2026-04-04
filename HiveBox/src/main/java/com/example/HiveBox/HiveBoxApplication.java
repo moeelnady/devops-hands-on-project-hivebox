@@ -9,6 +9,7 @@ public class HiveBoxApplication {
 
 	public static void main(String[] args) {
 				SpringApplication.run(HiveBoxApplication.class, args);
+
 	}
 
 }
