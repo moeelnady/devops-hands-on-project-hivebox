@@ -27,10 +27,21 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    - name: Run Tests
-      run: mvn test --file HiveBox/pom.xml
     - name: Build with Maven
       run: mvn -B package --file HiveBox/pom.xml
+    - name: Run application
+      run: |
+       java -jar HiveBox/target/*.jar &
+       sleep 15
+    - name: Test /version endpoint
+      run: |
+       response=$(curl -s http://localhost:8080/v1/version)
+       echo "Response: $response"
+
+       if [[ "$response" != *"v0.0.1"* ]]; then
+       echo "Version check failed!"
+       exit 1
+       fi
     - name: Lint Dockerfile
       uses: hadolint/hadolint-action@v3.1.0
       with:
