@@ -3,8 +3,9 @@ package com.example.HiveBox.controller;
 import com.example.HiveBox.service.TemperatureService.TemperatureService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 /**
  * REST controller for API endpoints.
  */
@@ -12,15 +13,15 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/v1")
 public final class APIController {
 
+    /** Service for temperature operations */
     private final TemperatureService temperatureService;
-
     /**
      * Constructor.
      *
-     * @param temperatureService service dependency
+     * @param service service dependency
      */
-    public APIController(final TemperatureService temperatureService) {
-        this.temperatureService = temperatureService;
+    public APIController(final TemperatureService service) {
+        this.temperatureService = service;
     }
 
     /**

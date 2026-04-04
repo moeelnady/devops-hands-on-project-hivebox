@@ -23,18 +23,17 @@ public final class TemperatureService {
     private static final int HOT_THRESHOLD = 36;
     private static final double ROUND_FACTOR = 100.0;
 
-    /** REST client */
+    /** REST client. */
     private final RestTemplate restTemplate = new RestTemplate();
 
-    /** JSON parser */
+    /** JSON parser. */
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    /** List of SenseBox IDs */
+    /** List of SenseBox IDs. */
     private final List<String> senseBoxIds = List.of(
             "5eba5fbad46fb8001b799786",
             "5c21ff8f919bf8001adf2488",
-            "5ade1acf223bd80019a1011c"
-    );
+            "5ade1acf223bd80019a1011c");
 
     /**
      * Fetches temperature data and calculates average.
@@ -117,7 +116,7 @@ public final class TemperatureService {
         Map<String, Object> result = new HashMap<>();
         result.put("average_temperature",
                 Math.round(avg * ROUND_FACTOR) / ROUND_FACTOR);
-        result.put("unit", "°C");
+        result.put("unit", "C");
         result.put("status", status);
         result.put("sources", temps.size());
 
