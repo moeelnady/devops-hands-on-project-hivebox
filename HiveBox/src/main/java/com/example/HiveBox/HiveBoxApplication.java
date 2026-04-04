@@ -2,14 +2,25 @@ package com.example.HiveBox;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.ConfigurableApplicationContext;
 
+/**
+ * Main entry point for HiveBox Spring Boot application.
+ */
 @SpringBootApplication
-public class HiveBoxApplication {
+public final class HiveBoxApplication {
 
-	public static void main(String[] args) {
-				SpringApplication.run(HiveBoxApplication.class, args);
-
+	/**
+	 * Private constructor to prevent instantiation.
+	 */
+	private HiveBoxApplication() {
 	}
 
+	/**
+	 * Main method to start the application.
+	 *
+	 * @param args command-line arguments
+	 */
+	public static void main(final String[] args) {
+		SpringApplication.run(HiveBoxApplication.class, args);
+	}
 }
