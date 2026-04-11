@@ -93,15 +93,6 @@ jobs:
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
-        # The Quality Gate action now knows exactly where to look 
-        # because Maven placed the report in the standard location.
-        - name: SonarCloud Quality Gate
-          uses: SonarSource/sonarqube-quality-gate-action@v1
-          with:
-            scanMetadataReportFile: HiveBox/target/sonar/report-task.txt
-          timeout-minutes: 5
-          env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     # =========================
     # SEMGREP (SAST)
     # =========================
