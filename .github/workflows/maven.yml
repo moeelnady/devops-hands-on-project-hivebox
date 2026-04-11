@@ -5,61 +5,164 @@
 # They are provided by a third-party and are governed by
 # separate terms of service, privacy policy, and support
 # documentation.
-
-name: Java CI with Maven
+name: Java CI with DevSecOps
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+
+permissions:
+  contents: read
+  security-events: write
 
 jobs:
+
+# =========================
+# BUILD + TEST JOB
+# =========================
+
   build:
 
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+
+    #  Run unit tests
+    - name: Run Tests
+      run: mvn -B test --file HiveBox/pom.xml
+
+    # Build application
     - name: Build with Maven
       run: mvn -B package --file HiveBox/pom.xml
+
+    # Run application
     - name: Run application
       run: |
-       java -jar HiveBox/target/*.jar &
-       sleep 15
+        java -jar HiveBox/target/*.jar &
+        sleep 20
+
+    # Integration test
     - name: Test /version endpoint
       run: |
-       response=$(curl -s http://localhost:8080/v1/version)
-       echo "Response: $response"
+        response=$(curl -s http://localhost:8080/v1/version)
+        echo "Response: $response"
 
-       if [[ "$response" != *"v0.0.1"* ]]; then
-       echo "Version check failed!"
-       exit 1
-       fi
+        if [[ "$response" != *"v0.0.1"* ]]; then
+          echo "Version check failed!"
+          exit 1
+        fi
+
+# =========================
+# CODE QUALITY + SECURITY
+# =========================
+
+  security:
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # =========================
+    # SONARQUBE
+    # =========================
+
+    - name: SonarQube Scan
+      uses: SonarSource/sonarqube-scan-action@v2
+      with:
+        projectBaseDir: HiveBox
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
+    - name: SonarQube Quality Gate Check
+      uses: SonarSource/sonarqube-quality-gate-action@v1
+      timeout-minutes: 5
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    # =========================
+    # SEMGREP (SAST)
+    # =========================
+
+    - name: Run Semgrep Security Scan
+      uses: returntocorp/semgrep-action@v1
+      with:
+        config: "p/ci"
+
+# =========================
+# KUBERNETES SECURITY
+# =========================
+
+  terrascan:
+
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Run Terrascan
+      uses: accurics/terrascan-action@main
+      with:
+        iac_type: "kubernetes"
+        iac_dir: "./k8s"
+        policy_type: "kubernetes"
+        only_warn: false
+
+# =========================
+# DOCKER BUILD + LINT
+# =========================
+
+  docker:
+
+    runs-on: ubuntu-latest
+    needs: security
+
+    steps:
+
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Dockerfile lint
     - name: Lint Dockerfile
       uses: hadolint/hadolint-action@v3.1.0
       with:
         dockerfile: HiveBox/Dockerfile
-    -
-      name: Login to Docker Hub
+
+    # Docker login
+    - name: Login to Docker Hub
       uses: docker/login-action@v4
       with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
-    -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v4
-    -
-        name: Build and push
-        uses: docker/build-push-action@v7
-        with:
-          context: ./HiveBox
-          push: true
-          tags: moeelnady/hivebox:latest
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    # Setup buildx
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v4
+
+    # Build and push image
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v7
+      with:
+        context: ./HiveBox
+        push: true
+        tags: moeelnady/hivebox:latest
 
