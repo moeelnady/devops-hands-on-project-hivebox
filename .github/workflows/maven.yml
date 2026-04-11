@@ -74,41 +74,42 @@ jobs:
     needs: build
 
     steps:
-    # Required for Sonar
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-    
-    # Build project first
-    - name: Build Project
-      run: mvn -B clean verify -f HiveBox/pom.xml
-    
-    # SonarCloud Scan (official)
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarcloud-github-action@v2
-      with:
-        projectBaseDir: HiveBox
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    
-    # Quality Gate Check
-    - name: SonarCloud Quality Gate
-      uses: SonarSource/sonarqube-quality-gate-action@v1
-      with:
-        scanMetadataReportFile: HiveBox/.scannerwork/report-task.txt
-      timeout-minutes: 5
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
+        - name: Checkout code
+          uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+  
+        - name: Set up JDK 17
+          uses: actions/setup-java@v4
+          with:
+            java-version: '17'
+            distribution: 'temurin'
+            cache: maven
+  
+        # This runs the build AND the Sonar scan. 
+        # Maven will automatically communicate with SonarCloud.
+        - name: Build and Analyze
+          run: mvn -B clean verify sonar:sonar -f HiveBox/pom.xml -Dsonar.token=${{ secrets.SONAR_TOKEN }}
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  
+        # The Quality Gate action now knows exactly where to look 
+        # because Maven placed the report in the standard location.
+        - name: SonarCloud Quality Gate
+          uses: SonarSource/sonarqube-quality-gate-action@v1
+          with:
+            scanMetadataReportFile: HiveBox/target/sonar/report-task.txt
+          timeout-minutes: 5
+          env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     # =========================
     # SEMGREP (SAST)
     # =========================
 
-    - name: Run Semgrep Security Scan
-      uses: returntocorp/semgrep-action@v1
-      with:
-        config: "p/ci"
+        - name: Run Semgrep Security Scan
+          uses: returntocorp/semgrep-action@v1
+          with:
+            config: "p/ci"
 
 # =========================
 # KUBERNETES SECURITY
