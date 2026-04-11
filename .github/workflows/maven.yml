@@ -83,12 +83,7 @@ jobs:
     # =========================
 
     - name: SonarCloud Scan
-      working-directory: HiveBox
-      run: mvn -B verify sonar:sonar \
-        -Dsonar.projectKey=moeelnady_HiveBox \
-        -Dsonar.organization=moeelnady \
-        -Dsonar.host.url=${{ secrets.SONAR_HOST_URL }} \
-        -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+      run: mvn -B verify sonar:sonar -f HiveBox/pom.xml -Dsonar.projectKey=moeelnady_HiveBox -Dsonar.organization=moeelnady -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
     - name: SonarQube Quality Gate Check
       uses: SonarSource/sonarqube-quality-gate-action@v1
