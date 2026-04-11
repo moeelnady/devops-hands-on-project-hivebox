@@ -74,21 +74,28 @@ jobs:
     needs: build
 
     steps:
-
+    # Required for Sonar
     - name: Checkout code
       uses: actions/checkout@v4
-
-    # =========================
-    # SONARQUBE
-    # =========================
-
+      with:
+        fetch-depth: 0
+    
+    # Build project first
+    - name: Build Project
+      run: mvn -B clean verify -f HiveBox/pom.xml
+    
+    # SonarCloud Scan (official)
     - name: SonarCloud Scan
-      run: mvn -B verify sonar:sonar -f HiveBox/pom.xml -Dsonar.projectKey=moeelnady_HiveBox -Dsonar.organization=moeelnady -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
+      uses: SonarSource/sonarcloud-github-action@v2
+      with:
+        projectBaseDir: HiveBox
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    
+    # Quality Gate Check
     - name: SonarCloud Quality Gate
       uses: SonarSource/sonarqube-quality-gate-action@v1
-      with:
-        scanMetadataReportFile: HiveBox/.scannerwork/report-task.txt
+      timeout-minutes: 5
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
