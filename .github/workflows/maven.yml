@@ -85,9 +85,10 @@ jobs:
     - name: SonarCloud Scan
       run: mvn -B verify sonar:sonar -f HiveBox/pom.xml -Dsonar.projectKey=moeelnady_HiveBox -Dsonar.organization=moeelnady -Dsonar.host.url=https://sonarcloud.io -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
-    - name: SonarQube Quality Gate Check
+    - name: SonarCloud Quality Gate
       uses: SonarSource/sonarqube-quality-gate-action@v1
-      timeout-minutes: 5
+      with:
+        scanMetadataReportFile: HiveBox/.scannerwork/report-task.txt
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
