@@ -95,9 +95,11 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
       - name: Build and analyze
+        working-directory: ./HiveBox
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=moeelnady_devops-hands-on-project-hivebox
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: mvn -B verify sonar:sonar -Dsonar.projectKey=moeelnady_devops-hands-on-project-hivebox
   
     # =========================
     # SEMGREP (SAST)
